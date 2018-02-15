@@ -13,6 +13,8 @@ import android.widget.Toast;
 
 public class MainActivity extends Activity {
     public static final String TAG = "Quizzner";
+    public static final String SCORE_KEY = "ScoreKey";
+    public static final String INDEX_KEY = "IndexKey";
     // TODO: Declare constants here
 
 
@@ -23,7 +25,7 @@ public class MainActivity extends Activity {
     TextView mQuestionTextView;
     int mIndex = 0;
     int mQuestion = 0;
-    int mCorrectAns = 0;
+    int mScore = 0;
     ProgressBar mProgressBar;
     TextView mScoreTextView;
 
@@ -51,6 +53,15 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if(savedInstanceState != null) {
+            mScore = savedInstanceState.getInt(SCORE_KEY);
+            mIndex = savedInstanceState.getInt(INDEX_KEY);
+        } else {
+            mScore = 0;
+            mIndex = 0;
+        }
+
         setContentView(R.layout.activity_main);
         mTrueButton = (Button) findViewById(R.id.true_button);
         mFalseButton = (Button) findViewById(R.id.false_button);
@@ -59,6 +70,8 @@ public class MainActivity extends Activity {
         mQuestionTextView.setText(mQuestion);
         mProgressBar = (ProgressBar) findViewById(R.id.progress_bar);
         mScoreTextView = (TextView) findViewById(R.id.score);
+
+        mScoreTextView.setText("Score:" + mScore + "/" + mQuestionBank.length);
 
         View.OnClickListener myListener = new View.OnClickListener() {
             @Override
@@ -90,7 +103,7 @@ public class MainActivity extends Activity {
             AlertDialog.Builder alert = new AlertDialog.Builder(this);
             alert.setTitle("Game Over");
             alert.setCancelable(false);
-            alert.setMessage("You scored " + mCorrectAns + " points!");
+            alert.setMessage("You scored " + mScore + " points!");
             alert.setPositiveButton("Close App", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -102,15 +115,23 @@ public class MainActivity extends Activity {
         mQuestion = mQuestionBank[mIndex].getQuestionID();
         mQuestionTextView.setText(mQuestion);
         mProgressBar.incrementProgressBy(PROGRESS_BAR_INCREMENT);
-        mScoreTextView.setText("Score:" + mCorrectAns + "/" + mQuestionBank.length);
+        mScoreTextView.setText("Score:" + mScore + "/" + mQuestionBank.length);
     }
 
     private void checkAnswer(boolean answer) {
         if(mQuestionBank[mIndex].isAnswer() == answer) {
-            mCorrectAns++;
+            mScore++;
             Toast.makeText(getApplicationContext(), R.string.correct_toast, Toast.LENGTH_SHORT);
         } else {
             Toast.makeText(getApplicationContext(), R.string.incorrect_toast, Toast.LENGTH_SHORT);
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SCORE_KEY, mScore);
+        outState.putInt(INDEX_KEY, mIndex);
+
     }
 }
